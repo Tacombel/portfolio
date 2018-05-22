@@ -12,6 +12,7 @@ db = client.meteor
 # Tablas MongoDB
 activos = db.activos
 cotizaciones = db.cotizaciones
+movimiento_activos = db.movimientosactivos
 
 # Conexion a SQLite
 
@@ -22,6 +23,7 @@ c = conn.cursor()
 
 c.execute("DELETE FROM cotizacion")
 c.execute("DELETE FROM activo")
+c.execute("DELETE FROM movimiento_activo")
 conn.commit()
 
 conn.commit()
@@ -46,5 +48,13 @@ for data in cursor:
     t = datetime.date(int(data['fecha'].strftime("%Y")), int(data['fecha'].strftime("%m")), int(data['fecha'].strftime("%d")))
     data['fecha'] = t
     c.execute("INSERT INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (data['fecha'], data['VL'], data['Id_Activo'],))
+
+cursor = movimiento_activos.find()
+for data in cursor:
+    data['Id_Activo'] = relacion[data['Id_Activo']]
+    data['fecha'] = data['fecha'] + datetime.timedelta(hours=5)
+    t = datetime.date(int(data['fecha'].strftime("%Y")), int(data['fecha'].strftime("%m")), int(data['fecha'].strftime("%d")))
+    data['fecha'] = t
+    c.execute("INSERT INTO movimiento_activo (fecha, unidades, precio, activo_id) VALUES (?, ?, ?, ?)", (data['fecha'], data['unidades'], data['precio'], data['Id_Activo'],))
 
 conn.commit()
