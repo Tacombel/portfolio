@@ -37,6 +37,27 @@ class User(UserMixin, db.Model):
         return User.query.get(id)
 
 
+class Activo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ticker = db.Column(db.String(64), index=True, unique=True)
+    nombre = db.Column(db.String(64), index=True, unique=True)
+    tipo = db.Column(db.Integer)
+    url = db.Column(db.String(256), unique=True)
+    moneda = db.Column(db.String(3))
+    descargar = db.Column(db.Boolean)
+    clase = db.Column(db.String(1))
+
+    def __repr__(self):
+        return '<Ticker {}>'.format(self.ticker)
+
+
+class Cotizacion(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime)
+    VL = db.Column(db.Float)
+    activo_id = db.Column(db.Integer, db.ForeignKey('activo.id'))
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
