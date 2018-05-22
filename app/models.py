@@ -39,10 +39,10 @@ class User(UserMixin, db.Model):
 
 class Activo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ticker = db.Column(db.String(64), index=True, unique=True)
-    nombre = db.Column(db.String(64), index=True, unique=True)
+    ticker = db.Column(db.String(64), unique=True)
+    nombre = db.Column(db.String(64), unique=True)
     tipo = db.Column(db.Integer)
-    url = db.Column(db.String(256), unique=True)
+    url = db.Column(db.String(256))
     moneda = db.Column(db.String(3))
     descargar = db.Column(db.Boolean)
     clase = db.Column(db.String(1))
