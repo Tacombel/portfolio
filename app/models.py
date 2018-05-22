@@ -58,6 +58,14 @@ class Cotizacion(db.Model):
     activo_id = db.Column(db.Integer, db.ForeignKey('activo.id'))
 
 
+class MovimientoActivo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime)
+    unidades = db.Column(db.Float)
+    precio = db.Column(db.Float)
+    activo_id = db.Column(db.Integer, db.ForeignKey('activo.id'))
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
