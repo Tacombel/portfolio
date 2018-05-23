@@ -12,7 +12,27 @@ import sqlite3
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html', title='Home')
+    response = []
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM activo WHERE descargar=1 ORDER BY nombre')
+    query = c.fetchall()
+
+    for q in query:
+        c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 2', (q[0],))
+        data = c.fetchall()
+        fechaultima = (data[0][1],)
+        VLultimo = data[0][2]
+        VLanterior = data[1][2]
+        variation = (VLultimo - VLanterior) / VLanterior * 100
+        VLultimo = ("{0:.4f}".format(VLultimo),)
+        VLanterior = ("{0:.4f}".format(VLanterior),)
+        fechaanterior = (data[1][1],)
+        variation = ("{0:.2f}".format(variation),)
+        line = q + fechaultima + VLultimo + fechaanterior + VLanterior + variation
+        response.append(line)
+
+    return render_template('index.html', title='Home', query=response)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -88,24 +108,10 @@ def reset_password(token):
 @app.route('/assets')
 @login_required
 def assets():
-    response = []
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
-    c.execute('SELECT * FROM activo WHERE descargar=1 ORDER BY nombre')
-    query = c.fetchall()
+    return render_template('assets.html', title='Assets')
 
-    for q in query:
-        c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 2', (q[0],))
-        data = c.fetchall()
-        fechaultima = (data[0][1],)
-        VLultimo = data[0][2]
-        VLanterior = data[1][2]
-        variation = (VLultimo - VLanterior) / VLanterior * 100
-        VLultimo = ("{0:.4f}".format(VLultimo),)
-        VLanterior = ("{0:.4f}".format(VLanterior),)
-        fechaanterior = (data[1][1],)
-        variation = ("{0:.2f}".format(variation),)
-        line = q + fechaultima + VLultimo + fechaanterior + VLanterior + variation
-        response.append(line)
 
-    return render_template('assets.html', title='Assets', query=response)
+@app.route('/van')
+@login_required
+def van():
+    return render_template('van.html', title='VAN')
