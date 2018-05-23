@@ -5,6 +5,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
 from werkzeug.urls import url_parse
 from app.email import send_password_reset_email
+import sqlite3
 
 
 @app.route('/')
@@ -82,3 +83,29 @@ def reset_password(token):
         flash('Your password has been reset.')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+
+@app.route('/assets')
+@login_required
+def assets():
+    response = []
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM activo WHERE descargar=1 ORDER BY nombre')
+    query = c.fetchall()
+
+    for q in query:
+        c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 2', (q[0],))
+        data = c.fetchall()
+        fechaultima = (data[0][1],)
+        VLultimo = data[0][2]
+        VLanterior = data[1][2]
+        variation = (VLultimo - VLanterior) / VLanterior * 100
+        VLultimo = ("{0:.4f}".format(VLultimo),)
+        VLanterior = ("{0:.4f}".format(VLanterior),)
+        fechaanterior = (data[1][1],)
+        variation = ("{0:.2f}".format(variation),)
+        line = q + fechaultima + VLultimo + fechaanterior + VLanterior + variation
+        response.append(line)
+
+    return render_template('assets.html', title='Assets', query=response)

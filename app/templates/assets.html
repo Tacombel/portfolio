@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th scope="col">Ticker</th>
+			<th scope="col">Nombre</th>
+			<th scope="col">Fecha</th>
+			<th scope="col">VL</th>
+			<th scope="col">Fecha Anterior</th>
+			<th scope="col">VL Anterior</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%for item in query %}
+		<tr>
+			<td>{{item[1]}}</td>
+			<td>{{item[2]}}</td>
+			<td>{{item[8]}}</td>
+			<td align="right">{{item[9]}}</td>
+			<td>{{item[10]}}</td>
+			<td align="right">{{item[11]}}</td>
+			<td>{{item[12]}} %</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
