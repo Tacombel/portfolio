@@ -64,6 +64,7 @@ class MovimientoActivo(db.Model):
     unidades = db.Column(db.Float)
     precio = db.Column(db.Float)
     activo_id = db.Column(db.Integer, db.ForeignKey('activo.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 @login.user_loader

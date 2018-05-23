@@ -55,6 +55,6 @@ for data in cursor:
     data['fecha'] = data['fecha'] + datetime.timedelta(hours=5)
     t = datetime.date(int(data['fecha'].strftime("%Y")), int(data['fecha'].strftime("%m")), int(data['fecha'].strftime("%d")))
     data['fecha'] = t
-    c.execute("INSERT INTO movimiento_activo (fecha, unidades, precio, activo_id) VALUES (?, ?, ?, ?)", (data['fecha'], data['unidades'], data['precio'], data['Id_Activo'],))
+    c.execute("INSERT INTO movimiento_activo (fecha, unidades, precio, activo_id, user_id) VALUES (?, ?, ?, ?, ?)", (data['fecha'], data['unidades'], data['precio'], data['Id_Activo'], 1,))
 
 conn.commit()
