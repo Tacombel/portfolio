@@ -47,7 +47,7 @@ for data in cursor:
     data['fecha'] = data['fecha'] + datetime.timedelta(hours=5)
     t = datetime.date(int(data['fecha'].strftime("%Y")), int(data['fecha'].strftime("%m")), int(data['fecha'].strftime("%d")))
     data['fecha'] = t
-    c.execute("INSERT INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (data['fecha'], data['VL'], data['Id_Activo'],))
+    c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (data['fecha'], data['VL'], data['Id_Activo'],))
 
 cursor = movimiento_activos.find()
 for data in cursor:
