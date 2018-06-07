@@ -11,7 +11,7 @@ c = conn.cursor()
 
 def scrape(type, url):
     print()
-    print("Scraping", url)
+    print("Scraping", url, flush=True)
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
     driver = webdriver.Chrome(chrome_options=options)
@@ -29,7 +29,7 @@ def scrape(type, url):
     date = tree.xpath(date_xpath)
     VL = tree.xpath(vl_xpath)
     if len(date) == 0 or len(VL) == 0:
-        print('No data')
+        print('No data', flush=True)
         return -1, -1
     return date[0], VL[0]
 
@@ -42,9 +42,9 @@ def look_for_data():
         element = [row[0], row[3], row[4]]
         candidates.append(element)
     n = 0
-    print('****************************************************************')
+    print('****************************************************************', flush=True)
     while len(candidates) > 0 and n < 4:
-        print('Candidates pending:', len(candidates))
+        print('Candidates pending:', len(candidates), flush=True)
         remove = []
         for index, e in enumerate(candidates):
             if e[1] == 0:
@@ -77,7 +77,7 @@ def look_for_data():
                 t = datetime.date(year, month, day)
                 VL = VL[:11]
                 VL = VL.replace(",", ".")
-            print(t, VL)
+            print(t, VL, flush=True)
             c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t, VL, e[0],))
             remove.append(index)
         conn.commit()
@@ -85,16 +85,18 @@ def look_for_data():
         for e in remove:
             del candidates[e]
         if len(candidates) > 0:
-            print('***********************************************')
-            print('The following candidates failed:')
+            print('***********************************************', flush=True)
+            print('The following candidates failed:', flush=True)
             for e in candidates:
-                print(e[2])
+                print(e[2], flush=True)
             n = n + 1
             if n > 3:
-                print('Too many retries. Aborting')
+                print('Too many retries. Aborting', flush=True)
             else:
                 time.sleep(60)
-                print('Retry number', n)
+                print('Retry number', n, flush=True)
+        else:
+            print('Scrape finished', flush=True)
 
 
 if __name__ == "__main__":
