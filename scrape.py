@@ -14,6 +14,8 @@ def scrape(type, url):
     print("Scraping", url, flush=True)
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
+    # This option is neccessary to avoid an error when running as a service
+    options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(chrome_options=options)
     driver.get(url)
     tree = html.fromstring(driver.page_source)
