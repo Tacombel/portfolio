@@ -43,7 +43,7 @@ for row in c.execute("SELECT * FROM activo WHERE descargar =?", t):
 n = 0
 print('****************************************************************')
 while len(candidates) > 0 and n < 4:
-    print('Candidatos pendientes:', len(candidates))
+    print('Candidates pending:', len(candidates))
     remove = []
     for index, e in enumerate(candidates):
         if e[1] == 0:
@@ -85,12 +85,12 @@ while len(candidates) > 0 and n < 4:
         del candidates[e]
     if len(candidates) > 0:
         print('***********************************************')
-        print('Han fallado los siguientes candidatos:')
+        print('The following candidates failed:')
         for e in candidates:
             print(e[2])
         n = n + 1
         if n > 3:
-            print('Demasiados reintentos. Abortando')
+            print('Too many retries. Aborting')
         else:
             time.sleep(60)
-            print('Reintento número', n)
+            print('Retry number', n)
