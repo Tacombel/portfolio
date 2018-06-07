@@ -105,4 +105,4 @@ def look_for_data():
 if __name__ == "__main__":
     while True:
         look_for_data()
-        time.sleep(10)
+        time.sleep(6590)
