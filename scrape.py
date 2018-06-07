@@ -30,6 +30,7 @@ def scrape(type, url):
         vl_xpath = '//*[@id="tabla_datos_generales"]/tbody/tr[4]/td/text()'
     date = tree.xpath(date_xpath)
     VL = tree.xpath(vl_xpath)
+    driver.quit()
     if len(date) == 0 or len(VL) == 0:
         print('No data', flush=True)
         return -1, -1
@@ -102,5 +103,6 @@ def look_for_data():
 
 
 if __name__ == "__main__":
-    look_for_data()
-    time.sleep(6500)
+    while True:
+        look_for_data()
+        time.sleep(10)
