@@ -159,13 +159,10 @@ def npv():
                 cashflows.append(item)
             item = (datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])), number * VL)
             cashflows.append(item)
-            print(cashflows)
-            print(name)
             try:
                 rate = "{0:.2f}".format(finantial.xirr(cashflows) * 100) + "%"
             except: # noqa Con esta formula se producen errores si las perdidas se acercan al 50%
                 rate = "Error"
-            print(rate)
         # END XIRR
         if currency == 'EUR':
             value = units[key] * VL
