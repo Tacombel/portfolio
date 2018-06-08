@@ -6,6 +6,7 @@ from app.models import User
 from werkzeug.urls import url_parse
 from app.email import send_password_reset_email
 import sqlite3
+import finantial
 
 
 @app.route('/')
@@ -15,7 +16,7 @@ def index():
     response = []
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM activo WHERE descargar=1 ORDER BY nombre')
+    c.execute('SELECT * FROM activo WHERE descargar=? ORDER BY nombre', (1,))
     query = c.fetchall()
 
     for q in query:
@@ -158,8 +159,8 @@ def npv():
         number = "{0:.2f}".format(number)
         VL = "{0:.2f}".format(VL)
         if number == "1.00":
-        	number = "-"
-        	VL = "-"
+            number = "-"
+            VL = "-"
         value = "{0:.2f}".format(value) + "€"
         line = []
         line.append(name)
