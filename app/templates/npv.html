@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<h1>Hi, {{ current_user.username }}!</h1>
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th scope="col">Nombre</th>
+			<th scope="col">Participaciones</th>
+			<th scope="col">Fecha</th>
+			<th scope="col">VL</th>
+			<th scope="col">Divisa</th>
+			<th scope="col">Total</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%for item in query %}
+		<tr>
+			<td>{{item[0]}}</td>
+			<td align="right">{{item[1]}}</td>
+			<td>{{item[2]}}</td>
+			<td align="right">{{item[3]}}</td>
+			<td>{{item[4]}}</td>
+			<td align="right">{{item[5]}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<h3 align="right">NPV = {{NPV}}</h3>
+{% endblock %}

@@ -111,7 +111,64 @@ def assets():
     return render_template('assets.html', title='Assets')
 
 
-@app.route('/van')
+@app.route('/npv')
 @login_required
-def van():
-    return render_template('van.html', title='VAN')
+def npv():
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM movimiento_activo ORDER BY fecha DESC')
+    query = c.fetchall()
+    units = {}
+    NPV = 0
+    for q in query:
+        if q[4] in units:
+            units[q[4]] = units[q[4]] + q[2]
+        else:
+            units[q[4]] = q[2]
+    delete = []
+    for key, value in units.items():
+        if value < 0.000001:
+            delete.append(key)
+    for e in delete:
+        del units[e]
+    response = []
+    for key in units:
+        c.execute('SELECT * FROM activo WHERE id=?', (key,))
+        query = c.fetchone()
+        name = query[2]
+        number = units[key]
+        currency = query[5]
+        c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 1', (key,))
+        query = c.fetchone()
+        date = query[1]
+        VL = query[2]
+        if currency == 'EUR':
+            value = units[key] * VL
+        elif currency == 'GBP':
+            c.execute('SELECT * FROM cotizacion WHERE activo_id=? AND fecha<=? ORDER BY fecha DESC LIMIT 1', (11, date,))
+            query = c.fetchone()
+            value_currency = query[2]
+            value = units[key] * VL / value_currency
+        elif currency == 'USD':
+            c.execute('SELECT * FROM cotizacion WHERE activo_id=? AND fecha<=? ORDER BY fecha DESC LIMIT 1', (10, date,))
+            query = c.fetchone()
+            value_currency = query[2]
+            value = number * VL / value_currency
+        NPV = NPV + value
+        number = "{0:.2f}".format(number)
+        VL = "{0:.2f}".format(VL)
+        if number == "1.00":
+        	number = "-"
+        	VL = "-"
+        value = "{0:.2f}".format(value) + "€"
+        line = []
+        line.append(name)
+        line.append(number)
+        line.append(date)
+        line.append(VL)
+        line.append(currency)
+        line.append(value)
+        response.append(line)
+    response = sorted(response, key=lambda asset: asset[0])
+    NPV = "{0:.2f}".format(NPV) + "€"
+    return render_template('npv.html', title='NPV', query=response, NPV=NPV)
