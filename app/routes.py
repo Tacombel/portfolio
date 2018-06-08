@@ -7,6 +7,7 @@ from werkzeug.urls import url_parse
 from app.email import send_password_reset_email
 import sqlite3
 import finantial
+import datetime
 
 
 @app.route('/')
@@ -143,6 +144,29 @@ def npv():
         query = c.fetchone()
         date = query[1]
         VL = query[2]
+        # XIRR
+        if number == 1:
+            rate = "-"
+        else:
+            c.execute('SELECT * FROM movimiento_activo WHERE activo_id=?', (key,))
+            query = c.fetchall()
+            cashflows = []
+            for q in query:
+                date_2 = q[1]
+                number_2 = q[2] * (-1)
+                price = q[3]
+                item = (datetime.date(int(date_2[0:4]), int(date_2[5:7]), int(date_2[8:])), number_2 * price)
+                cashflows.append(item)
+            item = (datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])), number * VL)
+            cashflows.append(item)
+            print(cashflows)
+            print(name)
+            try:
+                rate = "{0:.2f}".format(finantial.xirr(cashflows) * 100) + "%"
+            except: # noqa Con esta formula se producen errores si las perdidas se acercan al 50%
+                rate = "Error"
+            print(rate)
+        # END XIRR
         if currency == 'EUR':
             value = units[key] * VL
         elif currency == 'GBP':
@@ -169,6 +193,7 @@ def npv():
         line.append(VL)
         line.append(currency)
         line.append(value)
+        line.append(rate)
         response.append(line)
     response = sorted(response, key=lambda asset: asset[0])
     NPV = "{0:.2f}".format(NPV) + "€"
