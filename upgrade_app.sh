@@ -8,3 +8,4 @@ rsync --delete --progress --omit-dir-times --no-perms --stats -avz /home/daniel/
 rsync --delete --progress --omit-dir-times --no-perms --stats -avz /home/daniel/proyectos/portfolio/portfolio.py portfolio@192.168.1.55:/home/portfolio/portfolio/
 rsync --delete --progress --omit-dir-times --no-perms --stats -avz /home/daniel/proyectos/portfolio/requirements.txt portfolio@192.168.1.55:/home/portfolio/portfolio/
 rsync --delete --progress --omit-dir-times --no-perms --stats -avz /home/daniel/proyectos/portfolio/scrape.py portfolio@192.168.1.55:/home/portfolio/portfolio/
+rsync --delete --progress --omit-dir-times --no-perms --stats -avz /home/daniel/proyectos/portfolio/finantial.py portfolio@192.168.1.55:/home/portfolio/portfolio/
