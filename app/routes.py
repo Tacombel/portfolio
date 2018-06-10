@@ -6,7 +6,7 @@ from app.models import User
 from werkzeug.urls import url_parse
 from app.email import send_password_reset_email
 import sqlite3
-import finantial
+import XIRR
 import datetime
 
 
@@ -150,18 +150,19 @@ def npv():
         else:
             c.execute('SELECT * FROM movimiento_activo WHERE activo_id=?', (key,))
             query = c.fetchall()
-            cashflows = []
+            values = []
+            dates = []
             for q in query:
-                date_2 = q[1]
                 number_2 = q[2] * (-1)
                 price = q[3]
-                item = (datetime.date(int(date_2[0:4]), int(date_2[5:7]), int(date_2[8:])), number_2 * price)
-                cashflows.append(item)
-            item = (datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])), number * VL)
-            cashflows.append(item)
+                date_2 = q[1]
+                values.append(number_2 * price)
+                dates.append(datetime.date(int(date_2[0:4]), int(date_2[5:7]), int(date_2[8:])))
+            values.append(number * VL)
+            dates.append(datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])))
             try:
-                rate = "{0:.2f}".format(finantial.xirr(cashflows) * 100) + "%"
-            except: # noqa Con esta formula se producen errores si las perdidas se acercan al 50%
+                rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
+            except: # noqa
                 rate = "Error"
         # END XIRR
         if currency == 'EUR':
