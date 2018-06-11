@@ -14,17 +14,22 @@ def scrape(type, url):
     print("Scraping", url, flush=True)
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
-    # This option is neccessary to avoid an error when running as a service
+    # This option is necessary to avoid an error when running as a service
     options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(chrome_options=options)
     driver.get(url)
     tree = html.fromstring(driver.page_source)
+    date_old = False
     if type == 0:
         date_xpath = '//*[@id="overviewQuickstatsDiv"]/table/tbody/tr[2]/td[1]/span/text()'
         vl_xpath = '//*[@id="overviewQuickstatsDiv"]/table/tbody/tr[2]/td[3]/text()'
     if type == 1:
         date_xpath = '//*[@id="curr_table"]/tbody/tr[1]/td[1]/text()'
         vl_xpath = '//*[@id="curr_table"]/tbody/tr[1]/td[2]/text()'
+        date_xpath_old = '//*[@id="curr_table"]/tbody/tr[2]/td[1]/text()'
+        vl_xpath_old = '//*[@id="curr_table"]/tbody/tr[2]/td[2]/text()'
+        date_old = tree.xpath(date_xpath_old)
+        VL_old = tree.xpath(vl_xpath_old)
     if type == 2:
         date_xpath = '//*[@id="tabla_datos_generales"]/tbody/tr[4]/th/text()'
         vl_xpath = '//*[@id="tabla_datos_generales"]/tbody/tr[4]/td/text()'
@@ -34,7 +39,10 @@ def scrape(type, url):
     if len(date) == 0 or len(VL) == 0:
         print('No data', flush=True)
         return -1, -1
-    return date[0], VL[0]
+    if date_old:
+        return date[0], VL[0], date_old[0], VL_old[0]
+    else:
+        return date[0], VL[0]
 
 
 def look_for_data():
@@ -61,7 +69,7 @@ def look_for_data():
                 VL = VL[4:]
                 VL = VL.replace(",", ".")
             elif e[1] == 1 or e[1] == 3:
-                date, VL = scrape(1, e[2])
+                date, VL, date_old, VL_old = scrape(1, e[2])
                 if date == -1:
                     continue
                 day = int(date[0:2])
@@ -69,6 +77,11 @@ def look_for_data():
                 year = int(date[6:])
                 t = datetime.date(year, month, day)
                 VL = VL.replace(",", ".")
+                day_old = int(date_old[0:2])
+                month_old = int(date_old[3:5])
+                year_old = int(date_old[6:])
+                t_old = datetime.date(year_old, month_old, day_old)
+                VL_old = VL_old.replace(",", ".")
             elif e[1] == 2:
                 date, VL = scrape(2, e[2])
                 if date == -1:
@@ -81,6 +94,13 @@ def look_for_data():
                 VL = VL[:11]
                 VL = VL.replace(",", ".")
             print(t, VL, flush=True)
+            if e[1] == 1 or e[1] == 3:
+                c.execute("SELECT * from cotizacion WHERE fecha=? AND activo_id=?", (t, e[0],))
+                query = c.fetchone()
+                if not query:
+                    print('Updating last value of yesterday', flush=True)
+                    print(t_old, VL_old, flush=True)
+                    c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t_old, VL_old, e[0],))
             c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t, VL, e[0],))
             remove.append(index)
         conn.commit()
