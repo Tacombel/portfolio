@@ -82,6 +82,8 @@ def look_for_data():
                 year_old = int(date_old[6:])
                 t_old = datetime.date(year_old, month_old, day_old)
                 VL_old = VL_old.replace(",", ".")
+                print('Updating last value of yesterday:', t_old, VL_old, flush=True)
+                c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t_old, VL_old, e[0],))
             elif e[1] == 2:
                 date, VL = scrape(2, e[2])
                 if date == -1:
@@ -94,13 +96,6 @@ def look_for_data():
                 VL = VL[:11]
                 VL = VL.replace(",", ".")
             print(t, VL, flush=True)
-            if e[1] == 1 or e[1] == 3:
-                c.execute("SELECT * from cotizacion WHERE fecha=? AND activo_id=?", (t, e[0],))
-                query = c.fetchone()
-                if not query:
-                    print('Updating last value of yesterday', flush=True)
-                    print(t_old, VL_old, flush=True)
-                    c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t_old, VL_old, e[0],))
             c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t, VL, e[0],))
             remove.append(index)
         conn.commit()
