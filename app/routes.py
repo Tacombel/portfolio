@@ -168,12 +168,12 @@ def npv():
         if currency == 'EUR':
             value = units[key] * VL
         elif currency == 'GBP':
-            c.execute('SELECT * FROM cotizacion WHERE activo_id=? AND fecha<=? ORDER BY fecha DESC LIMIT 1', (11, date,))
+            c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 1', (11,))
             query = c.fetchone()
             value_currency = query[2]
             value = units[key] * VL / value_currency
         elif currency == 'USD':
-            c.execute('SELECT * FROM cotizacion WHERE activo_id=? AND fecha<=? ORDER BY fecha DESC LIMIT 1', (10, date,))
+            c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 1', (10,))
             query = c.fetchone()
             value_currency = query[2]
             value = number * VL / value_currency
