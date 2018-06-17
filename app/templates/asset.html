@@ -8,12 +8,20 @@
 <p>Scrape type: {{query[3]}}</p>
 <p>url: <a target="_blank" href="{{query[4]}}">{{query[4]}}</a></p>
 <p>Currency: {{query[5]}}</p>
-<p>Downloas: {{query[6]}}</p>
+<p>Download: {{query[6]}}</p>
 <p>Family: {{query[7]}}</p>
-<button type="button" class="btn btn-primary">Add VL</button>
+<hr />
 <div class="row">
-    <div class="col-md-4">
-        {{ wtf.quick_form(form) }}
-    </div>
+	<form class="form-inline" method="POST">
+		<div class="form-group mb-2">
+			<label for="fecha" class="sr-only">Fecha</label>
+			<input type="date" class="form-control-plaintext" id="fecha" name="fecha">
+		</div>
+		<div class="form-group mx-sm-3 mb-2">
+			<label for="VL" class="sr-only">VL</label>
+			<input type="text" class="form-control" id="VL" name="VL">
+		</div>
+		<button type="submit" class="btn btn-primary mb-2">Add VL</button>
+	</form>
 </div>
 {% endblock %}

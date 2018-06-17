@@ -43,7 +43,6 @@ class ResetPasswordForm(FlaskForm):
 
 
 class AddVLForm(FlaskForm):
-    # activo_id = HiddenField('activo_id', validators=[DataRequired()])
-    fecha = StringField('fecha', validators=[DataRequired()])
+    fecha = StringField('Fecha', validators=[DataRequired()])
     VL = StringField('VL', validators=[DataRequired()])
     submit = SubmitField('Add VL')

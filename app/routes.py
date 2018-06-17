@@ -153,10 +153,11 @@ def asset(id):
     c = conn.cursor()
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
     query = c.fetchone()
-    if form.validate_on_submit():
-        fecha = form.fecha.data
-        fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
-        c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, form.VL.data, query[0],))
+    if request.method == 'POST':
+        fecha = request.form.get('fecha')
+        VL = request.form.get('VL')
+        # fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
+        c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, VL, query[0],))
         conn.commit()
     return render_template('asset.html', title='Assets', query=query, form=form)
 
