@@ -1,8 +1,8 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, AddVLForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User
+from app.models import User, Cotizacion
 from werkzeug.urls import url_parse
 from app.email import send_password_reset_email
 import sqlite3
@@ -145,14 +145,20 @@ def assets():
     return render_template('assets.html', title='Assets', query=response)
 
 
-@app.route('/asset/<id>')
+@app.route('/asset/<id>', methods=['GET', 'POST'])
 @login_required
 def asset(id):
+    form = AddVLForm()
     conn = sqlite3.connect('app.db')
-    c = conn.cursor()    
+    c = conn.cursor()
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
     query = c.fetchone()
-    return render_template('asset.html', title='Assets', query=query)
+    if form.validate_on_submit():
+        fecha = form.fecha.data
+        fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
+        c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, form.VL.data, query[0],))
+        conn.commit()
+    return render_template('asset.html', title='Assets', query=query, form=form)
 
 
 @app.route('/npv')
