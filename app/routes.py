@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, AddVLForm
+from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User, Cotizacion
 from werkzeug.urls import url_parse
@@ -148,7 +148,6 @@ def assets():
 @app.route('/asset/<id>', methods=['GET', 'POST'])
 @login_required
 def asset(id):
-    form = AddVLForm()
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
@@ -159,7 +158,7 @@ def asset(id):
         # fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
         c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, VL, query[0],))
         conn.commit()
-    return render_template('asset.html', title='Assets', query=query, form=form)
+    return render_template('asset.html', title='Assets', query=query)
 
 
 @app.route('/npv')
