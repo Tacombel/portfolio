@@ -148,8 +148,11 @@ def assets():
 @app.route('/asset/<id>')
 @login_required
 def asset(id):
-    print(id, flush=True)
-    return render_template('asset.html', title='Assets', query=id)
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()    
+    c.execute('SELECT * FROM activo WHERE id=?', (id,))
+    query = c.fetchone()
+    return render_template('asset.html', title='Assets', query=query)
 
 
 @app.route('/npv')

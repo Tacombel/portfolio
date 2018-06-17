@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<p>Placeholder {{query}}</p>
+<h3>{{query[2]}}</h3>
+<p>Id: {{query[0]}}</p>
+<p>Ticker: {{query[1]}}</p>
+<p>Scrape type: {{query[3]}}</p>
+<p>url: <a target="_blank" href="{{query[4]}}">{{query[4]}}</a></p>
+<p>Currency: {{query[5]}}</p>
+<p>Downloas: {{query[6]}}</p>
+<p>Family: {{query[7]}}</p>
 {% endblock %}
