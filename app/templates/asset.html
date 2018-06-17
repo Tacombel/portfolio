@@ -12,6 +12,25 @@
 <p>Family: {{query[7]}}</p>
 <p>Units: {{query[8]}}</p>
 <hr />
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th scope="col">Date</th>
+			<th scope="col">Units</th>
+			<th scope="col">Price</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%for item in data_2 %}
+		<tr>
+			<td>{{item[1]}}</td>
+			<td>{{item[2]}}</td>
+			<td>{{item[3]}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+<hr />
 <div class="row">
 	<form class="form-inline" method="POST">
 		<div class="form-group mb-2">
