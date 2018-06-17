@@ -25,4 +25,20 @@
 		<button type="submit" class="btn btn-primary mb-2">Add VL</button>
 	</form>
 </div>
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th scope="col">Date</th>
+			<th scope="col">VL</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%for item in data_1 %}
+		<tr>
+			<td>{{item[1]}}</td>
+			<td>{{item[2]}}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
 {% endblock %}

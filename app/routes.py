@@ -157,13 +157,15 @@ def asset(id):
         response.append(q)
     units = assets_with_units()
     response.append(units[int(id)])
+    c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 5', (id,))
+    data_1 = c.fetchall()
     if request.method == 'POST':
         fecha = request.form.get('fecha')
         VL = request.form.get('VL')
         # fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
         c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, VL, query[0],))
         conn.commit()
-    return render_template('asset.html', title='Assets', query=response)
+    return render_template('asset.html', title='Assets', query=response, data_1=data_1)
 
 
 @app.route('/npv')
