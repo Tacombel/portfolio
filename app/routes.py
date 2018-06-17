@@ -145,7 +145,7 @@ def assets():
     return render_template('assets.html', title='Assets', query=response)
 
 
-@app.route('/asset/<id>', methods=['GET', 'POST'])
+@app.route('/asset/<id>')
 @login_required
 def asset(id):
     conn = sqlite3.connect('app.db')
@@ -161,13 +161,32 @@ def asset(id):
     data_1 = c.fetchall()
     c.execute('SELECT * FROM movimiento_activo WHERE activo_id=? ORDER BY fecha DESC LIMIT 5', (id,))
     data_2 = c.fetchall()
-    if request.method == 'POST':
-        fecha = request.form.get('fecha')
-        VL = request.form.get('VL')
-        # fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
-        c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, VL, query[0],))
-        conn.commit()
     return render_template('asset.html', title='Assets', query=response, data_1=data_1, data_2=data_2)
+
+
+@app.route('/asset/VL/<id>', methods=['POST'])
+@login_required
+def asset_vl(id):
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    fecha = request.form.get('fecha')
+    VL = request.form.get('VL')
+    c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, VL, id,))
+    conn.commit()
+    return redirect(url_for('asset', id=id))
+
+
+@app.route('/asset/movement/<id>', methods=['POST'])
+@login_required
+def asset_movement(id):
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    fecha = request.form.get('fecha')
+    unidades = request.form.get('unidades')
+    precio = request.form.get('precio')
+    c.execute("INSERT OR REPLACE INTO movimiento_activo (fecha, unidades, precio, activo_id, user_id) VALUES (?, ?, ?, ?, ?)", (fecha, unidades, precio, id, 1,))
+    conn.commit()
+    return redirect(url_for('asset', id=id))
 
 
 @app.route('/npv')
