@@ -10,6 +10,26 @@ import XIRR
 import datetime
 
 
+def assets_with_units():
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM movimiento_activo ORDER BY fecha DESC')
+    query = c.fetchall()
+    units = {}
+    for q in query:
+        if q[4] in units:
+            units[q[4]] = units[q[4]] + q[2]
+        else:
+            units[q[4]] = q[2]
+    delete = []
+    for key, value in units.items():
+        if value < 0.000001:
+            delete.append(key)
+    for e in delete:
+        del units[e]
+    return units
+
+
 @app.route('/')
 @app.route('/index')
 @login_required
@@ -110,29 +130,35 @@ def reset_password(token):
 @app.route('/assets')
 @login_required
 def assets():
-    return render_template('assets.html', title='Assets')
+    units = assets_with_units()
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    response = []
+    for key in units:
+        c.execute('SELECT * FROM activo WHERE id=?', (key,))
+        query = c.fetchone()
+        lista = []
+        lista.append(query[0])
+        lista.append(query[2])
+        response.append(lista)
+    response = sorted(response, key=lambda asset: asset[1])
+    return render_template('assets.html', title='Assets', query=response)
+
+
+@app.route('/asset/<id>')
+@login_required
+def asset(id):
+    print(id, flush=True)
+    return render_template('asset.html', title='Assets', query=id)
 
 
 @app.route('/npv')
 @login_required
 def npv():
+    units = assets_with_units()
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM movimiento_activo ORDER BY fecha DESC')
-    query = c.fetchall()
-    units = {}
     NPV = 0
-    for q in query:
-        if q[4] in units:
-            units[q[4]] = units[q[4]] + q[2]
-        else:
-            units[q[4]] = q[2]
-    delete = []
-    for key, value in units.items():
-        if value < 0.000001:
-            delete.append(key)
-    for e in delete:
-        del units[e]
     response = []
     for key in units:
         c.execute('SELECT * FROM activo WHERE id=?', (key,))

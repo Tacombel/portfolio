@@ -1,5 +1,17 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<p>Placeholder Assets</p>
-{% endblock %}
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th  data-field="name" data-formatter="LinkFormatter" scope="col">Name</th>
+		</tr>
+	</thead>
+	<tbody>
+		{%for item in query %}
+		<tr>
+			<td><a href="/asset/{{item[0]}}">{{item[1]}}</a></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>{% endblock %}
