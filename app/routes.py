@@ -200,6 +200,7 @@ def npv():
     for key in units:
         c.execute('SELECT * FROM activo WHERE id=?', (key,))
         query = c.fetchone()
+        activo_id = query[0]
         name = query[2]
         number = units[key]
         currency = query[5]
@@ -255,6 +256,7 @@ def npv():
         line.append(currency)
         line.append(value)
         line.append(rate)
+        line.append(activo_id)
         response.append(line)
     response = sorted(response, key=lambda asset: asset[0])
     NPV = "{0:.2f}".format(NPV) + "€"
