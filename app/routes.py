@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Cotizacion
+from app.models import User
 from werkzeug.urls import url_parse
 from app.email import send_password_reset_email
 import sqlite3
@@ -10,7 +10,7 @@ import XIRR
 import datetime
 
 
-def assets_with_units():
+def add_asset_units():
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
     c.execute('SELECT * FROM movimiento_activo ORDER BY fecha DESC')
@@ -21,9 +21,17 @@ def assets_with_units():
             units[q[4]] = units[q[4]] + q[2]
         else:
             units[q[4]] = q[2]
-    delete = []
     for key, value in units.items():
         if value < 0.000001:
+            units[key] = 0
+    return units
+
+
+def assets_with_units():
+    units = add_asset_units()
+    delete = []
+    for key, value in units.items():
+        if value == 0:
             delete.append(key)
     for e in delete:
         del units[e]
@@ -130,16 +138,15 @@ def reset_password(token):
 @app.route('/assets')
 @login_required
 def assets():
-    units = assets_with_units()
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
     response = []
-    for key in units:
-        c.execute('SELECT * FROM activo WHERE id=?', (key,))
-        query = c.fetchone()
+    c.execute('SELECT * FROM activo')
+    query = c.fetchall()
+    for q in query:
         lista = []
-        lista.append(query[0])
-        lista.append(query[2])
+        lista.append(q[0])
+        lista.append(q[2])
         response.append(lista)
     response = sorted(response, key=lambda asset: asset[1])
     return render_template('assets.html', title='Assets', query=response)
@@ -152,13 +159,20 @@ def asset(id):
     c = conn.cursor()
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
     query = c.fetchone()
+    # response
     response = []
     for q in query:
         response.append(q)
-    units = assets_with_units()
+    units = add_asset_units()
+    try:
+        units[int(id)]
+    except KeyError:
+        units[int(id)] = 0
     response.append(units[int(id)])
+    # data_1
     c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 5', (id,))
     data_1 = c.fetchall()
+    # data_2
     c.execute('SELECT * FROM movimiento_activo WHERE activo_id=? ORDER BY fecha DESC LIMIT 5', (id,))
     data_2 = c.fetchall()
     return render_template('asset.html', title='Assets', query=response, data_1=data_1, data_2=data_2)
