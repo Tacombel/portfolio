@@ -66,6 +66,14 @@ class MovimientoActivo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
+class InvestmentMovements(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime)
+    cantidad = db.Column((db.Float))
+    cuenta = db.Column(db.String(10))
+    comments = db.Column(db.String(50))
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
