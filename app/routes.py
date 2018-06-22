@@ -38,6 +38,10 @@ def assets_with_units(calculation_date):
     return units
 
 
+def date_str_to_date(fecha):
+    return datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
+
+
 def date_to_eu_format(fecha):
     fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
     return fecha.strftime("%-d-%-m-%Y")
@@ -303,11 +307,17 @@ def asset_movement(id):
     return redirect(url_for('asset', id=id))
 
 
-@app.route('/npv')
+@app.route('/npv', methods=['GET', 'POST'])
 @login_required
 def npv():
-    first_date = datetime.date(2016, 12, 31)
-    last_date = datetime.date.today()
+    if request.form.get('first_date'):
+        first_date = date_str_to_date(request.form.get('first_date'))
+    else:
+        first_date = datetime.date(2016, 12, 31)
+    if request.form.get('last_date'):
+        last_date = date_str_to_date(request.form.get('last_date'))
+    else:
+        last_date = datetime.date.today()
     response, NPV = npv_calculation(last_date)
     response = sorted(response, key=lambda asset: asset[0])
     NPV = "{0:.2f}".format(NPV) + "€"
