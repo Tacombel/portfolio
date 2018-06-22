@@ -38,6 +38,11 @@ def assets_with_units():
     return units
 
 
+def date_to_eu_format(fecha):
+    fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
+    return fecha.strftime("%-d-%-m-%Y")
+
+
 @app.route('/')
 @app.route('/index')
 @login_required
@@ -51,15 +56,24 @@ def index():
     for q in query:
         c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 2', (q[0],))
         data = c.fetchall()
-        fechaultima = (data[0][1],)
+        ticker = q[1]
+        nombre = q[2]
+        fechaultima = date_to_eu_format(data[0][1])
         VLultimo = data[0][2]
         VLanterior = data[1][2]
         variation = (VLultimo - VLanterior) / VLanterior * 100
-        VLultimo = ("{0:.4f}".format(VLultimo),)
-        VLanterior = ("{0:.4f}".format(VLanterior),)
-        fechaanterior = (data[1][1],)
-        variation = ("{0:.2f}".format(variation),)
-        line = q + fechaultima + VLultimo + fechaanterior + VLanterior + variation
+        VLultimo = "{0:.4f}".format(VLultimo)
+        VLanterior = "{0:.4f}".format(VLanterior)
+        fechaanterior = date_to_eu_format(data[1][1])
+        variation = "{0:.2f}".format(variation)
+        line = []
+        line.append(ticker)
+        line.append(nombre)
+        line.append(fechaultima)
+        line.append(VLultimo)
+        line.append(fechaanterior)
+        line.append(VLanterior)
+        line.append(variation)
         response.append(line)
 
     return render_template('index.html', title='Home', query=response)
@@ -262,6 +276,7 @@ def npv():
             number = "-"
             VL = "-"
         value = "{0:.2f}".format(value) + "€"
+        date = date_to_eu_format(date)
         line = []
         line.append(name)
         line.append(number)

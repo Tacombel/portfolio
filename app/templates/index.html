@@ -11,18 +11,19 @@
 			<th scope="col">VL</th>
 			<th scope="col">Fecha Anterior</th>
 			<th scope="col">VL Anterior</th>
+			<th scope="col">%</th>
 		</tr>
 	</thead>
 	<tbody>
 		{%for item in query %}
 		<tr>
+			<td>{{item[0]}}</td>
 			<td>{{item[1]}}</td>
 			<td>{{item[2]}}</td>
-			<td>{{item[8]}}</td>
-			<td align="right">{{item[9]}}</td>
-			<td>{{item[10]}}</td>
-			<td align="right">{{item[11]}}</td>
-			<td>{{item[12]}} %</td>
+			<td align="right">{{item[3]}}</td>
+			<td>{{item[4]}}</td>
+			<td align="right">{{item[5]}}</td>
+			<td>{{item[6]}} %</td>
 		</tr>
 		{% endfor %}
 	</tbody>
