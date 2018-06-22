@@ -327,4 +327,24 @@ def npv():
     data.append(first_date.strftime("%-d-%-m-%Y"))
     data.append(last_date.strftime("%-d-%-m-%Y"))
     data.append("{0:.2f}".format(difference) + "€")
+    # XIRR
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    c.execute('SELECT * FROM investment_movements WHERE fecha>=? and fecha<=? ', (first_date, last_date))
+    query = c.fetchall()
+    values = []
+    dates = []
+    for q in query:
+        values.append(q[2])
+        dates.append(date_str_to_date(q[2]))
+    values.append(first_NPV * (-1))
+    values.append(last_NPV)
+    dates.append(first_date)
+    dates.append(last_date)
+    try:
+        rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
+    except: # noqa
+        rate = "Error"
+    data.append(rate)
+    # END XIRR
     return render_template('npv.html', title='NPV', table=response, data=data)
