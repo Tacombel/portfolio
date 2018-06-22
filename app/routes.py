@@ -321,8 +321,10 @@ def npv():
     last_response, last_NPV = npv_calculation(last_date)
     response = sorted(last_response, key=lambda asset: asset[0])
     first_response, first_NPV = npv_calculation(first_date)
+    difference = last_NPV - first_NPV
     data.append("{0:.2f}".format(last_NPV) + "€")
     data.append("{0:.2f}".format(first_NPV) + "€")
     data.append(first_date.strftime("%-d-%-m-%Y"))
     data.append(last_date.strftime("%-d-%-m-%Y"))
+    data.append("{0:.2f}".format(difference) + "€")
     return render_template('npv.html', title='NPV', table=response, data=data)
