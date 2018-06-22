@@ -334,9 +334,12 @@ def npv():
     query = c.fetchall()
     values = []
     dates = []
+    benefit = first_NPV * (-1)
     for q in query:
+        dates.append(date_str_to_date(q[1]))
         values.append(q[2])
-        dates.append(date_str_to_date(q[2]))
+        benefit = benefit + q[2]
+    benefit = benefit + last_NPV
     values.append(first_NPV * (-1))
     values.append(last_NPV)
     dates.append(first_date)
@@ -345,6 +348,7 @@ def npv():
         rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
     except: # noqa
         rate = "Error"
+    data.append("{0:.2f}".format(benefit) + "€")
     data.append(rate)
     # END XIRR
     return render_template('npv.html', title='NPV', table=response, data=data)
