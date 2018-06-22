@@ -43,8 +43,7 @@ def date_str_to_date(fecha):
 
 
 def date_to_eu_format(fecha):
-    fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
-    return fecha.strftime("%-d-%-m-%Y")
+    return date_str_to_date(fecha).strftime("%-d-%-m-%Y")
 
 
 def npv_calculation(calculation_date):
