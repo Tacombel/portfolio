@@ -313,4 +313,6 @@ def npv():
     NPV = "{0:.2f}".format(NPV) + "€"
     response_old, NPV_old = npv_calculation(first_date)
     NPV_old = "{0:.2f}".format(NPV_old) + "€"
-    return render_template('npv.html', title='NPV', query=response, NPV=NPV, NPV_old=NPV_old)
+    first_date = first_date.strftime("%-d-%-m-%Y")
+    last_date = last_date.strftime("%-d-%-m-%Y")
+    return render_template('npv.html', title='NPV', query=response, first_date=first_date, NPV=NPV, last_date=last_date, NPV_old=NPV_old)
