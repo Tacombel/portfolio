@@ -6,11 +6,25 @@
 <h3>{{query[2]}}</h3>
 <p>Id: {{query[0]}}</p>
 <p>Ticker: {{query[1]}}</p>
+{% if query[3] == null  or query[3] == '' %}
+{% else %}
 <p>Scrape type: {{query[3]}}</p>
+{% endif %}
+{% if query[4] == null  or query[4] == '' %}
+{% else %}
 <p>url: <a target="_blank" href="{{query[4]}}">{{query[4]}}</a></p>
+{% endif %}
 <p>Currency: {{query[5]}}</p>
-<p>Download: {{query[6]}}</p>
+{% if query[6] == 0 %}
+<p>Download: False</p>
+{% endif %}
+{% if query[6] == 1 %}
+<p>Download: True</p>
+{% endif %}
+{% if query[7] == null  or query[7] == '' %}
+{% else %}
 <p>Family: {{query[7]}}</p>
+{% endif %}
 <p>Units: {{query[8]}}</p>
 <hr />
 <div class="row">
