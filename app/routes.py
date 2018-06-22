@@ -309,6 +309,7 @@ def asset_movement(id):
 @app.route('/npv', methods=['GET', 'POST'])
 @login_required
 def npv():
+    data = []
     if request.form.get('first_date'):
         first_date = date_str_to_date(request.form.get('first_date'))
     else:
@@ -317,11 +318,11 @@ def npv():
         last_date = date_str_to_date(request.form.get('last_date'))
     else:
         last_date = datetime.date.today()
-    response, NPV = npv_calculation(last_date)
-    response = sorted(response, key=lambda asset: asset[0])
-    NPV = "{0:.2f}".format(NPV) + "€"
-    response_old, NPV_old = npv_calculation(first_date)
-    NPV_old = "{0:.2f}".format(NPV_old) + "€"
-    first_date = first_date.strftime("%-d-%-m-%Y")
-    last_date = last_date.strftime("%-d-%-m-%Y")
-    return render_template('npv.html', title='NPV', query=response, first_date=first_date, NPV=NPV, last_date=last_date, NPV_old=NPV_old)
+    last_response, last_NPV = npv_calculation(last_date)
+    response = sorted(last_response, key=lambda asset: asset[0])
+    first_response, first_NPV = npv_calculation(first_date)
+    data.append("{0:.2f}".format(last_NPV) + "€")
+    data.append("{0:.2f}".format(first_NPV) + "€")
+    data.append(first_date.strftime("%-d-%-m-%Y"))
+    data.append(last_date.strftime("%-d-%-m-%Y"))
+    return render_template('npv.html', title='NPV', table=response, data=data)

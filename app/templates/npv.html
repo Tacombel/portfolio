@@ -2,45 +2,45 @@
 
 {% block app_content %}
 <table class="table table-striped">
-	<thead>
-		<tr>
-			<th scope="col">Nombre</th>
-			<th scope="col">Participaciones</th>
-			<th scope="col">Fecha</th>
-			<th scope="col">VL</th>
-			<th scope="col">Divisa</th>
-			<th scope="col">Total</th>
-			<th scope="col">TIR</th>
-		</tr>
-	</thead>
-	<tbody>
-		{%for item in query %}
-		<tr>
-			<td><a href="/asset/{{item[7]}}">{{item[0]}}</td>
-			<td align="right">{{item[1]}}</td>
-			<td>{{item[2]}}</td>
-			<td align="right">{{item[3]}}</td>
-			<td>{{item[4]}}</td>
-			<td align="right">{{item[5]}}</td>
-			<td align="right">{{item[6]}}</td>
-		</tr>
-		{% endfor %}
-	</tbody>
+    <thead>
+        <tr>
+            <th scope="col">Nombre</th>
+            <th scope="col">Participaciones</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">VL</th>
+            <th scope="col">Divisa</th>
+            <th scope="col">Total</th>
+            <th scope="col">TIR</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for item in table %}
+        <tr>
+            <td><a href="/asset/{{item[7]}}">{{item[0]}}</td>
+            <td align="right">{{item[1]}}</td>
+            <td>{{item[2]}}</td>
+            <td align="right">{{item[3]}}</td>
+            <td>{{item[4]}}</td>
+            <td align="right">{{item[5]}}</td>
+            <td align="right">{{item[6]}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 <hr/>
 <form action="" class="form-inline" method="POST">
-		<div class="form-group mb-2">
-			<p>First Date</p>
-			<label for="first_date" class="sr-only">Last Date</label>
-			<input type="date" class="form-control-plaintext" id="fist_date" name="first_date">
-		</div>
-		<div class="form-group mb-2">
-			<p>Last Date</p>
-			<label for="last_date" class="sr-only">Last Date</label>
-			<input type="date" class="form-control-plaintext" id="last_date" name="last_date">
-		</div>
-		<button type="submit" class="btn btn-primary mb-2">Submit</button>
-	</form>
-<h3>{{last_date}}: NPV = {{NPV}}</h3>
-<h3>{{first_date}}: NPV = {{NPV_old}}</h3>
+        <div class="form-group mb-2">
+            <p>First Date</p>
+            <label for="first_date" class="sr-only">Last Date</label>
+            <input type="date" class="form-control-plaintext" id="fist_date" name="first_date">
+        </div>
+        <div class="form-group mb-2">
+            <p>Last Date</p>
+            <label for="last_date" class="sr-only">Last Date</label>
+            <input type="date" class="form-control-plaintext" id="last_date" name="last_date">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Submit</button>
+    </form>
+<h3>{{data[3]}}: NPV = {{data[0]}}</h3>
+<h3>{{data[2]}}: NPV = {{data[1]}}</h3>
 {% endblock %}
