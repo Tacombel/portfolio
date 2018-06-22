@@ -174,22 +174,37 @@ def asset(id):
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
     query = c.fetchone()
     # response
-    response = []
+    response_0 = []
     for q in query:
-        response.append(q)
+        response_0.append(q)
     units = add_asset_units()
     try:
         units[int(id)]
     except KeyError:
         units[int(id)] = 0
-    response.append(units[int(id)])
+    response_0.append(units[int(id)])
     # data_1
     c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 5', (id,))
     data_1 = c.fetchall()
+    response_1 = []
+    for d in data_1:
+        line = []
+        line.append(date_to_eu_format(d[1]))
+        line.append(d[2])
+        response_1.append(line)
+
     # data_2
     c.execute('SELECT * FROM movimiento_activo WHERE activo_id=? ORDER BY fecha DESC LIMIT 5', (id,))
     data_2 = c.fetchall()
-    return render_template('asset.html', title='Assets', query=response, data_1=data_1, data_2=data_2)
+    response_2 = []
+    for d in data_2:
+        line = []
+        line.append(date_to_eu_format(d[1]))
+        line.append(d[2])
+        line.append(d[3])
+        response_2.append(line)
+
+    return render_template('asset.html', title='Assets', query=response_0, data_1=response_1, data_2=response_2)
 
 
 @app.route('/asset/VL/<id>', methods=['POST'])
