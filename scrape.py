@@ -69,7 +69,11 @@ def look_for_data():
                 VL = VL[4:]
                 VL = VL.replace(",", ".")
             elif e[1] == 1 or e[1] == 3:
-                date, VL, date_old, VL_old = scrape(1, e[2])
+                try:
+                    date, VL, date_old, VL_old = scrape(1, e[2])
+                except ValueError as e:
+                    print("Algo a fallado:", e, flush=True)
+                    continue
                 if date == -1:
                     continue
                 day = int(date[0:2])
@@ -82,7 +86,7 @@ def look_for_data():
                 year_old = int(date_old[6:])
                 t_old = datetime.date(year_old, month_old, day_old)
                 VL_old = VL_old.replace(",", ".")
-                print('Updating last value of yesterday:', t_old, VL_old, flush=True)
+                print(t_old, VL_old, flush=True)
                 c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (t_old, VL_old, e[0],))
             elif e[1] == 2:
                 date, VL = scrape(2, e[2])
