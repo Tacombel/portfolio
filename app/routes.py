@@ -10,10 +10,10 @@ import XIRR
 import datetime
 
 
-def add_asset_units():
+def add_asset_units(calculation_date):
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM movimiento_activo ORDER BY fecha DESC')
+    c.execute('SELECT * FROM movimiento_activo WHERE fecha<=? ORDER BY fecha DESC', (calculation_date,))
     query = c.fetchall()
     units = {}
     for q in query:
@@ -27,8 +27,8 @@ def add_asset_units():
     return units
 
 
-def assets_with_units():
-    units = add_asset_units()
+def assets_with_units(calculation_date):
+    units = add_asset_units(calculation_date)
     delete = []
     for key, value in units.items():
         if value == 0:
@@ -41,6 +41,77 @@ def assets_with_units():
 def date_to_eu_format(fecha):
     fecha = datetime.date(int(fecha[0:4]), int(fecha[5:7]), int(fecha[8:]))
     return fecha.strftime("%-d-%-m-%Y")
+
+
+def npv_calculation(calculation_date):
+    units = assets_with_units(calculation_date)
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    NPV = 0
+    response = []
+    for key in units:
+        c.execute('SELECT * FROM activo WHERE id=?', (key,))
+        query = c.fetchone()
+        activo_id = query[0]
+        name = query[2]
+        number = units[key]
+        currency = query[5]
+        c.execute('SELECT * FROM cotizacion WHERE activo_id=? and fecha<=? ORDER BY fecha DESC LIMIT 1', (key, calculation_date))
+        query = c.fetchone()
+        date = query[1]
+        VL = query[2]
+        # XIRR
+        if number == 1:
+            rate = "-"
+        else:
+            c.execute('SELECT * FROM movimiento_activo WHERE activo_id=? and fecha<=? ', (key, calculation_date))
+            query = c.fetchall()
+            values = []
+            dates = []
+            for q in query:
+                number_2 = q[2] * (-1)
+                price = q[3]
+                date_2 = q[1]
+                values.append(number_2 * price)
+                dates.append(datetime.date(int(date_2[0:4]), int(date_2[5:7]), int(date_2[8:])))
+            values.append(number * VL)
+            dates.append(datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])))
+            try:
+                rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
+            except: # noqa
+                rate = "Error"
+        # END XIRR
+        if currency == 'EUR':
+            value = units[key] * VL
+        elif currency == 'GBP':
+            c.execute('SELECT * FROM cotizacion WHERE activo_id=? and fecha<=?  ORDER BY fecha DESC LIMIT 1', (11, calculation_date))
+            query = c.fetchone()
+            value_currency = query[2]
+            value = units[key] * VL / value_currency
+        elif currency == 'USD':
+            c.execute('SELECT * FROM cotizacion WHERE activo_id=?  and fecha<=? ORDER BY fecha DESC LIMIT 1', (10, calculation_date))
+            query = c.fetchone()
+            value_currency = query[2]
+            value = number * VL / value_currency
+        NPV = NPV + value
+        number = "{0:.2f}".format(number)
+        VL = "{0:.2f}".format(VL)
+        if number == "1.00":
+            number = "-"
+            VL = "-"
+        value = "{0:.2f}".format(value) + "€"
+        date = date_to_eu_format(date)
+        line = []
+        line.append(name)
+        line.append(number)
+        line.append(date)
+        line.append(VL)
+        line.append(currency)
+        line.append(value)
+        line.append(rate)
+        line.append(activo_id)
+        response.append(line)
+    return response, NPV
 
 
 @app.route('/')
@@ -177,7 +248,7 @@ def asset(id):
     response_0 = []
     for q in query:
         response_0.append(q)
-    units = add_asset_units()
+    units = add_asset_units(datetime.date.today())
     try:
         units[int(id)]
     except KeyError:
@@ -235,73 +306,11 @@ def asset_movement(id):
 @app.route('/npv')
 @login_required
 def npv():
-    units = assets_with_units()
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
-    NPV = 0
-    response = []
-    for key in units:
-        c.execute('SELECT * FROM activo WHERE id=?', (key,))
-        query = c.fetchone()
-        activo_id = query[0]
-        name = query[2]
-        number = units[key]
-        currency = query[5]
-        c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 1', (key,))
-        query = c.fetchone()
-        date = query[1]
-        VL = query[2]
-        # XIRR
-        if number == 1:
-            rate = "-"
-        else:
-            c.execute('SELECT * FROM movimiento_activo WHERE activo_id=?', (key,))
-            query = c.fetchall()
-            values = []
-            dates = []
-            for q in query:
-                number_2 = q[2] * (-1)
-                price = q[3]
-                date_2 = q[1]
-                values.append(number_2 * price)
-                dates.append(datetime.date(int(date_2[0:4]), int(date_2[5:7]), int(date_2[8:])))
-            values.append(number * VL)
-            dates.append(datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])))
-            try:
-                rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
-            except: # noqa
-                rate = "Error"
-        # END XIRR
-        if currency == 'EUR':
-            value = units[key] * VL
-        elif currency == 'GBP':
-            c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 1', (11,))
-            query = c.fetchone()
-            value_currency = query[2]
-            value = units[key] * VL / value_currency
-        elif currency == 'USD':
-            c.execute('SELECT * FROM cotizacion WHERE activo_id=? ORDER BY fecha DESC LIMIT 1', (10,))
-            query = c.fetchone()
-            value_currency = query[2]
-            value = number * VL / value_currency
-        NPV = NPV + value
-        number = "{0:.2f}".format(number)
-        VL = "{0:.2f}".format(VL)
-        if number == "1.00":
-            number = "-"
-            VL = "-"
-        value = "{0:.2f}".format(value) + "€"
-        date = date_to_eu_format(date)
-        line = []
-        line.append(name)
-        line.append(number)
-        line.append(date)
-        line.append(VL)
-        line.append(currency)
-        line.append(value)
-        line.append(rate)
-        line.append(activo_id)
-        response.append(line)
+    first_date = datetime.date(2016, 12, 31)
+    last_date = datetime.date.today()
+    response, NPV = npv_calculation(last_date)
     response = sorted(response, key=lambda asset: asset[0])
     NPV = "{0:.2f}".format(NPV) + "€"
-    return render_template('npv.html', title='NPV', query=response, NPV=NPV)
+    response_old, NPV_old = npv_calculation(first_date)
+    NPV_old = "{0:.2f}".format(NPV_old) + "€"
+    return render_template('npv.html', title='NPV', query=response, NPV=NPV, NPV_old=NPV_old)
