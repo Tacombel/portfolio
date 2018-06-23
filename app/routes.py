@@ -371,7 +371,7 @@ def investments():
     query = c.fetchall()
     for q in query:
         lista = []
-        lista.append(q[1])
+        lista.append(date_str_to_date(q[1]).strftime("%-d-%-m-%Y"))
         lista.append("{0:.2f}".format(q[2]) + "€")
         lista.append(q[3])
         lista.append(q[4])
