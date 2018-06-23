@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="container container-fluid">
+	<form action="/investments" class="form-inline" method="POST">
+		<div class="form-group">
+				<label for="fecha" class="sr-only">Date</label>
+				<input type="date" class="form-control-plaintext" id="fecha" name="fecha" required>
+		</div>
+		<div class="form-group">
+			<label for="amount" class="sr-only">Amount</label>
+			<input type="float" class="form-control" id="amount" name="amount" required>
+		</div>
+		<div class="form-group">
+			<label for="account" class="sr-only">Account</label>
+			<input type="text" class="form-control" id="account" name="account" required>
+		</div>
+		<div class="form-group">
+			<label for="comments" class="sr-only">Comments</label>
+			<input type="text" class="form-control" id="comments" name="comments">
+		</div>
+		<button type="submit" class="btn btn-primary mb-2">Add</button>
+	</form>
+</div>
+<hr/>
+<div class="container container-fluid">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th scope="col">Date</th>
+				<th scope="col">Amount</th>
+				<th scope="col">Account</th>
+				<th scope="col">Comments</th>
+			</tr>
+		</thead>
+		<tbody>
+			{%for item in table %}
+			<tr>
+				<td class="col-sm-2">{{item[0]}}</td>
+				<td class="col-sm-2 text-right">{{item[1]}}</td>
+				<td class="col-sm-2">{{item[2]}}</td>
+				<td class="col-sm-6">{{item[3]}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}

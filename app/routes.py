@@ -352,3 +352,28 @@ def npv():
     data.append(rate)
     # END XIRR
     return render_template('npv.html', title='NPV', table=response, data=data)
+
+
+@app.route('/investments', methods=['GET', 'POST'])
+@login_required
+def investments():
+    conn = sqlite3.connect('app.db')
+    c = conn.cursor()
+    if request.method == 'POST':
+        a = request.form.get('fecha')
+        b = request.form.get('amount')
+        d = request.form.get('account')
+        e = request.form.get('comments')
+        c.execute("INSERT OR REPLACE INTO investment_movements (fecha, cantidad, cuenta, comments) VALUES (?, ?, ?, ?)", (a, b, d, e))
+        conn.commit()
+    response = []
+    c.execute('SELECT * FROM investment_movements ORDER BY fecha DESC')
+    query = c.fetchall()
+    for q in query:
+        lista = []
+        lista.append(q[1])
+        lista.append("{0:.2f}".format(q[2]) + "€")
+        lista.append(q[3])
+        lista.append(q[4])
+        response.append(lista)
+    return render_template('investments.html', table=response)
