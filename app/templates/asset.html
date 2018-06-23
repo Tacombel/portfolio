@@ -3,6 +3,7 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
+<div class="container container-fluid well well-lg">
 <h3>{{query[2]}}</h3>
 <p>Id: {{query[0]}}</p>
 <p>Ticker: {{query[1]}}</p>
@@ -26,7 +27,8 @@
 <p>Family: {{query[7]}}</p>
 {% endif %}
 <p>Units: {{query[8]}}</p>
-<hr />
+</div>
+<div class="container container-fluid">
 <div class="row">
 	<form action="/asset/movement/{{query[0]}}" class="form-inline" method="POST">
 		<div class="form-group mb-2">
@@ -62,7 +64,8 @@
 		{% endfor %}
 	</tbody>
 </table>
-<hr />
+</div>
+<div class="container container-fluid">
 <div class="row">
 	<form action="/asset/VL/{{query[0]}}" class="form-inline" method="POST">
 		<div class="form-group mb-2">
@@ -92,4 +95,5 @@
 		{% endfor %}
 	</tbody>
 </table>
+</div>
 {% endblock %}
