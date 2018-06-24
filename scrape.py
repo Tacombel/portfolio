@@ -5,8 +5,23 @@ import datetime
 import time
 
 
+# Initial setup
+
 conn = sqlite3.connect('app.db')
 c = conn.cursor()
+
+c.execute("SELECT * from variables WHERE name=?", ("next_scrape",))
+query = c.fetchone()
+if query is None:
+    current_time = time.time()
+    c.execute("INSERT INTO variables (name, value) VALUES (?,?)", ("next_scrape", current_time))
+c.execute("SELECT * from variables WHERE name=?", ("scrape_interval",))
+query = c.fetchone()
+if query is None:
+    c.execute("INSERT INTO variables (name, value) VALUES (?,?)", ("scrape_interval", 6590))
+conn.commit()
+
+# End initial setup
 
 
 def scrape(type, url):
@@ -122,16 +137,18 @@ def look_for_data():
 
 
 if __name__ == "__main__":
-    c.execute("SELECT * from variables WHERE name=?", ("next_scrape",))
-    query = c.fetchone()
-    if query is None:
-        current_time = time.time()
-        c.execute("INSERT INTO variables (name, value) VALUES (?,?)", ("next_scrape", current_time))
-    c.execute("SELECT * from variables WHERE name=?", ("scrape_interval",))
-    query = c.fetchone()
-    if query is None:
-        c.execute("INSERT INTO variables (name, value) VALUES (?,?)", ("scrape_interval", 6590))
-    conn.commit()
+    # This two lines force a scrape whenever the module is executed
+    current_time = time.time()
+    c.execute("INSERT OR REPLACE INTO variables (name, value) VALUES (?,?)", ("next_scrape", current_time))
     while True:
-        look_for_data()
-        time.sleep(6590)
+        c.execute("SELECT * from variables WHERE name=?", ("next_scrape",))
+        query = c.fetchone()
+        current_time = time.time()
+        if current_time > float(query[1]):
+            look_for_data()
+            c.execute("SELECT * from variables WHERE name=?", ("scrape_interval",))
+            query = c.fetchone()
+            next_scrape = time.time() + float(query[1])
+            c.execute("INSERT OR REPLACE INTO variables (name, value) VALUES (?,?)", ("next_scrape", next_scrape))
+            conn.commit()
+        time.sleep(5)
