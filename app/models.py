@@ -74,6 +74,11 @@ class InvestmentMovements(db.Model):
     comments = db.Column(db.String(50))
 
 
+class Variables(db.Model):
+    name = db.Column(db.String(10), primary_key=True)
+    value = db.Column(db.String(20))
+
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))

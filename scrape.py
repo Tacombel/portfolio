@@ -122,6 +122,16 @@ def look_for_data():
 
 
 if __name__ == "__main__":
+    c.execute("SELECT * from variables WHERE name=?", ("next_scrape",))
+    query = c.fetchone()
+    if query is None:
+        current_time = time.time()
+        c.execute("INSERT INTO variables (name, value) VALUES (?,?)", ("next_scrape", current_time))
+    c.execute("SELECT * from variables WHERE name=?", ("scrape_interval",))
+    query = c.fetchone()
+    if query is None:
+        c.execute("INSERT INTO variables (name, value) VALUES (?,?)", ("scrape_interval", 6590))
+    conn.commit()
     while True:
         look_for_data()
         time.sleep(6590)
