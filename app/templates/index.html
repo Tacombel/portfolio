@@ -18,7 +18,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{%for item in query %}
+		{%for item in table %}
 		<tr>
 			<td>{{item[0]}}</td>
 			<td>{{item[1]}}</td>
@@ -31,5 +31,9 @@
 		{% endfor %}
 	</tbody>
 </table>
+</div>
+<div>
+	<p>Last update {{ moment(data[0]).fromNow() }}</p>
+	<p>Next update {{ moment(data[1]).fromNow() }}</p>
 </div>
 {% endblock %}

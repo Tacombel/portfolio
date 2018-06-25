@@ -8,6 +8,7 @@ from app.email import send_password_reset_email
 import sqlite3
 import XIRR
 import datetime
+import time
 
 
 def add_asset_units(calculation_date):
@@ -150,7 +151,20 @@ def index():
         line.append(variation)
         response.append(line)
 
-    return render_template('index.html', title='Home', query=response)
+    data = []
+    c.execute("SELECT * from variables WHERE name=?", ("next_scrape",))
+    query = c.fetchone()
+    next_scrape = int(float(query[1]))
+    c.execute("SELECT * from variables WHERE name=?", ("scrape_interval",))
+    query = c.fetchone()
+    scrape_interval = int(float(query[1]))
+    t_last = datetime.datetime.utcfromtimestamp(next_scrape - scrape_interval)
+    t_next = datetime.datetime.utcfromtimestamp(next_scrape)
+    print(t_next)
+    data.append(t_last)
+    data.append(t_next)
+
+    return render_template('index.html', title='Home', table=response, data=data)
 
 
 @app.route('/login', methods=['GET', 'POST'])
