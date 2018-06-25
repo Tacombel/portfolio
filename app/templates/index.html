@@ -32,8 +32,11 @@
 	</tbody>
 </table>
 </div>
-<div>
+<div class="container container-fluid">
 	<p>Last update {{ moment(data[0]).fromNow() }}</p>
 	<p>Next update {{ moment(data[1]).fromNow() }}</p>
+	<form action="{{ url_for('index') }}" method="post">
+		<button type="submit" name="update_now" class="btn btn-primary">Update Now</button>	
+	</form>
 </div>
 {% endblock %}

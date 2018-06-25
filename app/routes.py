@@ -119,12 +119,16 @@ def npv_calculation(calculation_date):
 
 
 @app.route('/')
-@app.route('/index')
+@app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    response = []
     conn = sqlite3.connect('app.db')
     c = conn.cursor()
+    if request.method == 'POST':
+        current_time = time.time()
+        c.execute("INSERT OR REPLACE INTO variables (name, value) VALUES (?,?)", ("next_scrape", current_time))
+        conn.commit()
+    response = []
     c.execute('SELECT * FROM activo WHERE descargar=? ORDER BY nombre', (1,))
     query = c.fetchall()
 
@@ -160,7 +164,6 @@ def index():
     scrape_interval = int(float(query[1]))
     t_last = datetime.datetime.utcfromtimestamp(next_scrape - scrape_interval)
     t_next = datetime.datetime.utcfromtimestamp(next_scrape)
-    print(t_next)
     data.append(t_last)
     data.append(t_next)
 
