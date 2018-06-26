@@ -83,7 +83,7 @@ def npv_calculation(calculation_date):
             try:
                 rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
             except: # noqa
-                rate = "Error"
+                rate = "XIRR error"
         # END XIRR
         if currency == 'EUR':
             value = units[key] * VL
