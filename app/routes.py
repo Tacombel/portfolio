@@ -11,9 +11,11 @@ import datetime
 import time
 
 
+conn = sqlite3.connect('app.db')
+c = conn.cursor()
+
+
 def add_asset_units(calculation_date):
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     c.execute('SELECT * FROM movimiento_activo WHERE fecha<=? ORDER BY fecha DESC', (calculation_date,))
     query = c.fetchall()
     units = {}
@@ -47,13 +49,31 @@ def date_to_eu_format(fecha):
     return date_str_to_date(fecha).strftime("%-d-%-m-%Y")
 
 
+def to_euros(value, date, currency):
+    if currency == 'GBP':
+        c.execute('SELECT * FROM cotizacion WHERE activo_id=? and fecha<=?  ORDER BY fecha DESC LIMIT 1', (11, date))
+        query = c.fetchone()
+        if query is None:
+            value_currency = 0.8523
+        else:
+            value_currency = query[2]
+        value = value / value_currency
+    elif currency == 'USD':
+        c.execute('SELECT * FROM cotizacion WHERE activo_id=?  and fecha<=? ORDER BY fecha DESC LIMIT 1', (10, date))
+        query = c.fetchone()
+        value_currency = query[2]
+        value = value / value_currency
+    else:
+        value = value
+    return value
+
+
 def npv_calculation(calculation_date):
     units = assets_with_units(calculation_date)
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     NPV = 0
     response = []
     for key in units:
+        profit = 0
         c.execute('SELECT * FROM activo WHERE id=?', (key,))
         query = c.fetchone()
         activo_id = query[0]
@@ -66,7 +86,7 @@ def npv_calculation(calculation_date):
         VL = query[2]
         # XIRR
         if number == 1:
-            rate = "-"
+            rate = ""
         else:
             c.execute('SELECT * FROM movimiento_activo WHERE activo_id=? and fecha<=? ', (key, calculation_date))
             query = c.fetchall()
@@ -76,7 +96,9 @@ def npv_calculation(calculation_date):
                 number_2 = q[2] * (-1)
                 price = q[3]
                 date_2 = q[1]
-                values.append(number_2 * price)
+                v = number_2 * price
+                profit = profit + to_euros(v, date_2, currency)
+                values.append(v)
                 dates.append(date_str_to_date(date_2))
             values.append(number * VL)
             dates.append(date_str_to_date(date))
@@ -97,12 +119,15 @@ def npv_calculation(calculation_date):
             query = c.fetchone()
             value_currency = query[2]
             value = number * VL / value_currency
+        profit = profit + value
         NPV = NPV + value
         number = "{0:.2f}".format(number)
         VL = "{0:.2f}".format(VL)
+        profit = "{0:.2f}".format(profit) + "€"
         if number == "1.00":
-            number = "-"
-            VL = "-"
+            number = ""
+            VL = ""
+            profit = ""
         value = "{0:.2f}".format(value) + "€"
         date = date_to_eu_format(date)
         line = []
@@ -114,6 +139,7 @@ def npv_calculation(calculation_date):
         line.append(value)
         line.append(rate)
         line.append(activo_id)
+        line.append(profit)
         response.append(line)
     return response, NPV
 
@@ -122,8 +148,6 @@ def npv_calculation(calculation_date):
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     if request.method == 'POST':
         current_time = time.time()
         c.execute("INSERT OR REPLACE INTO variables (name, value) VALUES (?,?)", ("next_scrape", current_time))
@@ -243,8 +267,6 @@ def reset_password(token):
 @app.route('/assets')
 @login_required
 def assets():
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     response = []
     c.execute('SELECT * FROM activo')
     query = c.fetchall()
@@ -260,8 +282,7 @@ def assets():
 @app.route('/asset/<id>')
 @login_required
 def asset(id):
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
+    print(id)
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
     query = c.fetchone()
     # response
@@ -301,8 +322,6 @@ def asset(id):
 @app.route('/asset/VL/<id>', methods=['POST'])
 @login_required
 def asset_vl(id):
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     fecha = request.form.get('fecha')
     VL = request.form.get('VL')
     c.execute("INSERT OR REPLACE INTO cotizacion (fecha, VL, activo_id) VALUES (?, ?, ?)", (fecha, VL, id,))
@@ -313,8 +332,6 @@ def asset_vl(id):
 @app.route('/asset/movement/<id>', methods=['POST'])
 @login_required
 def asset_movement(id):
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     fecha = request.form.get('fecha')
     unidades = request.form.get('unidades')
     precio = request.form.get('precio')
@@ -345,8 +362,6 @@ def npv():
     data.append(last_date.strftime("%-d-%-m-%Y"))
     data.append("{0:.2f}".format(difference) + "€")
     # XIRR
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     c.execute('SELECT * FROM investment_movements WHERE fecha>=? and fecha<=? ', (first_date, last_date))
     query = c.fetchall()
     values = []
@@ -374,8 +389,6 @@ def npv():
 @app.route('/investments', methods=['GET', 'POST'])
 @login_required
 def investments():
-    conn = sqlite3.connect('app.db')
-    c = conn.cursor()
     if request.method == 'POST':
         a = request.form.get('fecha')
         b = request.form.get('amount')
