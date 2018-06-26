@@ -364,7 +364,7 @@ def npv():
     try:
         rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
     except: # noqa
-        rate = "Error"
+        rate = "XIRR error"
     data.append("{0:.2f}".format(benefit) + "€")
     data.append(rate)
     # END XIRR
