@@ -53,15 +53,14 @@ def to_euros(value, date, currency):
     if currency == 'GBP':
         c.execute('SELECT * FROM cotizacion WHERE activo_id=? and fecha<=?  ORDER BY fecha DESC LIMIT 1', (11, date))
         query = c.fetchone()
-        if query is None:
-            value_currency = 0.8523
-        else:
-            value_currency = query[2]
+        value_currency = query[2]
+        print("GBP", date, value_currency)
         value = value / value_currency
     elif currency == 'USD':
         c.execute('SELECT * FROM cotizacion WHERE activo_id=?  and fecha<=? ORDER BY fecha DESC LIMIT 1', (10, date))
         query = c.fetchone()
         value_currency = query[2]
+        print(currency, date, value_currency)
         value = value / value_currency
     else:
         value = value
@@ -282,7 +281,6 @@ def assets():
 @app.route('/asset/<id>')
 @login_required
 def asset(id):
-    print(id)
     c.execute('SELECT * FROM activo WHERE id=?', (id,))
     query = c.fetchone()
     # response
