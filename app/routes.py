@@ -77,9 +77,9 @@ def npv_calculation(calculation_date):
                 price = q[3]
                 date_2 = q[1]
                 values.append(number_2 * price)
-                dates.append(datetime.date(int(date_2[0:4]), int(date_2[5:7]), int(date_2[8:])))
+                dates.append(date_str_to_date(date_2))
             values.append(number * VL)
-            dates.append(datetime.date(int(date[0:4]), int(date[5:7]), int(date[8:])))
+            dates.append(date_str_to_date(date))
             try:
                 rate = "{0:.2f}".format(XIRR.xirr(values, dates) * 100) + "%"
             except: # noqa
